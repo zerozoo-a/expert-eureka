@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='./style.css'>
+    <title>윤영주_과제</title>
+</head>
+
+<body>
+    <div >
+        <ol id='showList'>
+        <li>hello?</li>
+        <li>ThisIs</li>
+        <li>DummyData</li>
+
+
+        </ol>
+    </div>
+    <div>
+
+        <form
+        action=''
+        method='POST'
+        id='form-ex'
+        onsubmit='getComment(event);'>
+            <div class='form-ex' >
+                <label 
+                for='comment'>
+                    your text
+                </label>
+                <input 
+                onclick="askLogin"
+                type="text" name='comment' id='comment' required>
+                <input type='submit' value='등록' id='submit'>
+            </div>
+        </form>
+    </div>
+
+
+    <div id='askLogin'>
+        <h3>SNS로그인해서 댓글 쓰기</h3>
+        <div>네이버로 로그인</div>
+        <div>카카오톡으로 로그인</div>
+        <div>페이스북으로 로그인</div>
+        <div>구글로 로그인</div>
+        <div>트위터로 로그인</div>
+    </div>
+
+    <script 
+    type='module'
+    src='./src/App.js'>
+</script>
+</body>
+</html> 
