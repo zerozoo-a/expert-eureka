@@ -1,5 +1,4 @@
-import { userInfo } from './userInfo.js';
-
+let isLogIn = false;
 let comments = [];
 let commentsCnt = 0;
 let times = [];
@@ -8,15 +7,222 @@ const restrictWords = {
   eu: ['nerd', 'LaLaLa Love Song', 'dodgeCoin'],
   isRestricted: false,
 };
+let dummyUserData = {
+  sns: null,
+  user1: [
+    { sns: 'naver', loggedInUser: null },
+    { id: 'q', pwd: '1', comments: [], like: 0 },
+    { id: 'secondID', pwd: '1234', comments: [] },
+  ],
+  user2: [
+    { sns: 'kakao', loggedInUser: null },
+    { id: 'kakaoID', pwd: '1111', comments: [] },
+    { id: 'kakaoId', pwd: '1111', comments: [] },
+  ],
+  user3: [
+    { sns: 'faceBook', loggedInUser: null },
+    { id: 'facebookID', pwd: '1232', comments: [] },
+  ],
+  user4: [
+    { sns: 'google', loggedInUser: null },
+    { id: 'googleID', pwd: '1231', comments: [] },
+  ],
+  user5: [
+    { sns: 'twitter', loggedInUser: null },
+    { id: 'twitterID', pwd: '1230', comments: [] },
+  ],
+};
+const navState = () => {
+  const logOutBtn = document.getElementById('logInState');
+  const showUp = (nodeEl) => {
+    nodeEl.classList.remove('invisible');
+    nodeEl.classList.add('up');
+  };
+  if (isLogIn) {
+    logOutBtn.innerText = '로그아웃';
+    commentState();
+  } else {
+    logOutBtn.innerText = '로그인';
+  }
+  logOutBtn.onclick = () => {
+    if (!isLogIn) {
+      showUp(document.getElementById('snsWindow'));
+    } else {
+      isLogIn = false;
+      navState();
+      commentState();
+    }
+  };
+};
+navState();
 
-// const askLogin = () => {
-//   //   userInfo;
-//   //   console.log('haha');
-//   alert('haha');
-// };
-function askLogin() {
-  userInfo();
-}
+const commentState = () => {
+  let buttons = document.getElementsByTagName('button');
+  if (buttons.length === 0) return;
+  const spreadButtons = [...buttons];
+  if (!isLogIn) {
+    spreadButtons.forEach((button) => (button.style.display = 'none'));
+    return;
+  }
+  let commentStateLoggedInUser = null;
+  let commentStateComments = null;
+  const findLoggedInUser = (sns, user) => {
+    const index = sns.findIndex((findId) => findId.id === user);
+    commentStateComments = sns[index].comments;
+    commentStateLoggedInUser = sns[0].loggedInUser;
+  };
+  switch (dummyUserData.sns) {
+    case 'naver':
+      findLoggedInUser(
+        dummyUserData.user1,
+        dummyUserData.user1[0].loggedInUser
+      );
+      break;
+    case 'kakaoTalk':
+      findLoggedInUser(
+        dummyUserData.user2,
+        dummyUserData.user2[0].loggedInUser
+      );
+      break;
+
+    case 'faceBook':
+      findLoggedInUser(
+        dummyUserData.user3,
+        dummyUserData.user3[0].loggedInUser
+      );
+      break;
+
+    case 'google':
+      findLoggedInUser(
+        dummyUserData.user4,
+        dummyUserData.user4[0].loggedInUser
+      );
+      break;
+    case 'twitter':
+      findLoggedInUser(
+        dummyUserData.user5,
+        dummyUserData.user5[0].loggedInUser
+      );
+      break;
+
+    default:
+      return;
+  }
+
+  spreadButtons.forEach((button) => {
+    if (button.dataset.owner !== commentStateLoggedInUser) {
+      button.style.display = 'none';
+    } else {
+      button.style.display = 'inline';
+    }
+  });
+};
+commentState();
+const logIn = (event) => {
+  if (event) event.preventDefault();
+  const id = document.getElementById('inputId').value;
+  const pwd = document.getElementById('inputPwd').value;
+  const sns = dummyUserData.sns;
+  const users = dummyUserData;
+
+  const showDown = (nodeEl) => {
+    nodeEl.classList.add('invisible');
+    nodeEl.classList.remove('up');
+  };
+  const logInWindowForm = document.getElementById('logInWindowForm');
+
+  const authenticate = (sns, id, pwd) => {
+    const checkIdPwd = (userN) => {
+      const index = userN.findIndex((findId) => findId.id === id);
+      if (index === -1) return;
+      return userN[index].id === id && userN[index].pwd === pwd ? true : false;
+    };
+    switch (sns) {
+      case 'naver':
+        checkIdPwd(users.user1) ? (isLogIn = true) : (isLogIn = false);
+        if (users.user1) users.user1[0].loggedInUser = id;
+        return isLogIn;
+      case 'kakaoTalk':
+        checkIdPwd(users.user2) ? (isLogIn = true) : (isLogIn = false);
+        if (users.user2) users.user2[0].loggedInUser = id;
+        return isLogIn;
+      case 'faceBook':
+        checkIdPwd(users.user3) ? (isLogIn = true) : (isLogIn = false);
+        if (users.user3) users.user3[0].loggedInUser = id;
+        return isLogIn;
+      case 'google':
+        checkIdPwd(users.user4) ? (isLogIn = true) : (isLogIn = false);
+        if (users.user4) users.user4[0].loggedInUser = id;
+        return isLogIn;
+      case 'twitter':
+        checkIdPwd(users.user5) ? (isLogIn = true) : (isLogIn = false);
+        if (users.user5) users.user5[0].loggedInUser = id;
+        return isLogIn;
+      default:
+        return false;
+    }
+  };
+  if (authenticate(sns, id, pwd)) {
+    navState();
+    commentState();
+    showDown(logInWindowForm);
+  } else {
+    alert('ID 혹은 PASS WORD가 맞지 않습니다.');
+  }
+};
+
+// commentState();
+
+const askLogin = (sns) => {
+  if (isLogIn) {
+    return;
+  }
+  const showUp = (nodeEl) => {
+    nodeEl.classList.remove('invisible');
+    nodeEl.classList.add('up');
+  };
+  const showDown = (nodeEl) => {
+    nodeEl.classList.add('invisible');
+    nodeEl.classList.remove('up');
+  };
+  const snsWindow = document.getElementById('snsWindow');
+  const logInWindow = document.getElementById('logInWindowForm');
+  switch (sns) {
+    case 'logIn':
+      showUp(snsWindow);
+      return;
+
+    case 'naver':
+      showDown(snsWindow);
+      showUp(logInWindow);
+      dummyUserData.sns = 'naver';
+      return;
+
+    case 'kakaoTalk':
+      showDown(snsWindow);
+      showUp(logInWindow);
+      dummyUserData.sns = 'kakaoTalk';
+      return;
+
+    case 'faceBook':
+      showDown(snsWindow);
+      showUp(logInWindow);
+      dummyUserData.sns = 'faceBook';
+      return;
+    case 'google':
+      showDown(snsWindow);
+      showUp(logInWindow);
+      dummyUserData.sns = 'google';
+      return;
+    case 'twitter':
+      showDown(snsWindow);
+      showUp(logInWindow);
+      dummyUserData.sns = 'twitter';
+      return;
+    default:
+      return;
+  }
+};
 
 const restrictSpam = () => {
   const waitSeconds = () => {
@@ -61,26 +267,70 @@ const restrictWord = (comment) => {
   }
 };
 
-document.getElementById('comment').focus();
+// document.getElementById('comment').focus();
 const getComment = (event) => {
   event.preventDefault();
+  if (!isLogIn) return;
+  let comments = [];
+  let loggedInUser = null;
+  const findLoggedInUser = (sns, user) => {
+    const index = sns.findIndex((findId) => findId.id === user);
+    comments = sns[index].comments;
+    loggedInUser = sns[0].loggedInUser;
+  };
+  switch (dummyUserData.sns) {
+    case 'naver':
+      findLoggedInUser(
+        dummyUserData.user1,
+        dummyUserData.user1[0].loggedInUser
+      );
+      break;
+    case 'kakaoTalk':
+      findLoggedInUser(
+        dummyUserData.user2,
+        dummyUserData.user2[0].loggedInUser
+      );
+      break;
 
+    case 'faceBook':
+      findLoggedInUser(
+        dummyUserData.user3,
+        dummyUserData.user3[0].loggedInUser
+      );
+      break;
+
+    case 'google':
+      findLoggedInUser(
+        dummyUserData.user4,
+        dummyUserData.user4[0].loggedInUser
+      );
+      break;
+    case 'twitter':
+      findLoggedInUser(
+        dummyUserData.user5,
+        dummyUserData.user5[0].loggedInUser
+      );
+      break;
+
+    default:
+      return;
+  }
   restrictWord(document.querySelector('#comment').value);
   if (restrictWords.isRestricted) return;
-
   restrictWords.isRestricted = false;
-
   restrictSpam();
   comments.push(document.querySelector('#comment').value);
   document.querySelector('#comment').value = '';
   setComment(comments);
-  makeDeleteBtn();
-  makeModifyBtn(comments);
+  makeDeleteBtn(loggedInUser);
+  makeModifyBtn(comments, loggedInUser);
+  commentState();
 };
 
 const setComment = (comments) => {
   const list = document.createElement('li');
   const div = document.createElement('div');
+
   div.innerText = comments[comments.length - 1];
   list.id = ++commentsCnt;
   div.id = commentsCnt + 'comment';
@@ -88,9 +338,10 @@ const setComment = (comments) => {
   document.getElementById(commentsCnt).appendChild(div);
 };
 
-const makeDeleteBtn = () => {
+const makeDeleteBtn = (loggedInUser) => {
   const id = commentsCnt;
   const deleteBtn = document.createElement('button');
+  deleteBtn.dataset.owner = loggedInUser;
   deleteBtn.innerHTML = 'X';
   deleteBtn.onclick = () => {
     if (window.confirm('댓글을 지우시겠습니까?')) {
@@ -103,16 +354,16 @@ const makeDeleteBtn = () => {
   document.getElementById(id).appendChild(deleteBtn);
 };
 
-const makeModifyBtn = (comments) => {
+const makeModifyBtn = (comments, loggedInUser) => {
   const id = commentsCnt;
   const modifyBtn = document.createElement('button');
+  modifyBtn.dataset.owner = loggedInUser;
   modifyBtn.id = id + 'modifyBtn';
   modifyBtn.innerHTML = '수정';
   modifyBtn.onclick = () => {
     if (modifyBtn.innerHTML === '수정') {
       modifyBtn.innerHTML = '취소';
 
-      console.log(comments);
       comments.map((v, i) => {
         if (parseInt(i + 1) === id) {
           return;
@@ -145,7 +396,6 @@ const makeModifyBtn = (comments) => {
       const modifySubmitBtnFnc = () => {
         modifyBtn.innerHTML = '수정';
         const modifiedValue = document.getElementById(id + 'modify').value;
-        console.log(comments[id - 1]);
         comments[id - 1] = modifiedValue;
 
         document.getElementById(id + 'comment').innerText = modifiedValue;
