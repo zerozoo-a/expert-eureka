@@ -9,6 +9,9 @@
 </head>
 
 <body>
+    <div id='NAV'>
+        <div id='logInState'></div>
+    </div>
     <div >
         <ol id='showList'>
         <li>hello?</li>
@@ -23,7 +26,6 @@
         <form
         action=''
         method='POST'
-        id='form-ex'
         onsubmit='getComment(event);'>
             <div class='form-ex' >
                 <label 
@@ -31,25 +33,65 @@
                     your text
                 </label>
                 <input 
-                onclick="askLogin()"
+                onclick='askLogin("logIn")'
+                autocomplete="off"
                 type="text" name='comment' id='comment' required>
-                <input type='submit' value='등록' id='submit'>
+                <input 
+                type='submit' value='등록' id='submit'>
             </div>
         </form>
     </div>
 
 
-    <div id='askLogin'>
+    <div 
+    id='snsWindow'
+    class='invisible'>
         <h3>SNS로그인해서 댓글 쓰기</h3>
-        <div>네이버로 로그인</div>
-        <div>카카오톡으로 로그인</div>
-        <div>페이스북으로 로그인</div>
-        <div>구글로 로그인</div>
-        <div>트위터로 로그인</div>
+        <div id='naverLogIn'
+        onclick="askLogin('naver')"
+        >네이버로 로그인</div>
+        <div id='kakaoTalkLogIn'
+        onclick="askLogin('kakaoTalk')"
+        >카카오톡으로 로그인</div>
+        <div id='facebookLogIn'
+        onclick="askLogin('faceBook')"
+        >페이스북으로 로그인</div>
+        <div id='googleLogIn'
+        onclick="askLogin('google')"
+        >구글로 로그인</div>
+        <div id='twitterLogIn'
+        onclick="askLogin('twitter')"
+        >트위터로 로그인</div>
+    </div>
+    <div id='logInWindowContainer'>
+        <form
+        method='POST'
+        id='logInWindowForm'
+        class='invisible'
+        onsubmit="logIn(event)"
+        >
+        <label 
+        for='id'>
+            ID: 
+        </label>
+        <input type='text'
+        id='inputId'
+        required
+        placeholder="ID:please input your sns ID, PWD"
+        >
+        <label
+        for='pwd'
+        >PASS WORD: </label>
+        <input type='password'
+        id='inputPwd'
+        required
+        >
+        <input type='submit' value='log in'>
+    </form>
+
     </div>
 
     <script 
-    type='module'
     src='./src/App.js'>
 </script>
 </body>
