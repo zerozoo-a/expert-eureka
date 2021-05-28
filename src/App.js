@@ -11,7 +11,7 @@ let dummyUserData = {
   sns: null,
   user1: [
     { sns: 'naver', loggedInUser: null },
-    { id: 'q', pwd: '1', comments: [], like: 0 },
+    { id: 'q', pwd: '1', comments: [], likedUser: [{ like: 0 }] },
     { id: 'secondID', pwd: '1234', comments: [] },
   ],
   user2: [
@@ -321,21 +321,117 @@ const getComment = (event) => {
   restrictSpam();
   comments.push(document.querySelector('#comment').value);
   document.querySelector('#comment').value = '';
-  setComment(comments);
+  setComment(comments, loggedInUser);
   makeDeleteBtn(loggedInUser);
   makeModifyBtn(comments, loggedInUser);
   commentState();
 };
 
-const setComment = (comments) => {
+const setComment = (comments, loggedInUser) => {
+  const cnt = commentsCnt;
   const list = document.createElement('li');
   const div = document.createElement('div');
+  const like = document.createElement('div');
+  let userLike = null;
+  let userLikeSetter = null;
+  const findUserLike = (user) => {
+    let likeIndex = user.findIndex((user) => user.id === loggedInUser);
+    user[likeIndex].likedUser.push({ like: 0 });
+    // console.log(cnt);
+    // console.log('here!!!', user[likeIndex].likedUser);
+    userLike = user[likeIndex].likedUser[cnt].like;
+    userLikeSetter = user[likeIndex];
+  };
+  switch (dummyUserData.sns) {
+    case 'naver':
+      findUserLike(dummyUserData.user1);
+      break;
+    case 'kakaoTalk':
+      findUserLike(dummyUserData.user2);
+      break;
+    case 'faceBook':
+      findUserLike(dummyUserData.user3);
+      break;
+    case 'google':
+      findUserLike(dummyUserData.user4);
+      break;
+    case 'twitter':
+      findUserLike(dummyUserData.user5);
+      break;
+    default:
+      break;
+  }
 
   div.innerText = comments[comments.length - 1];
-  list.id = ++commentsCnt;
   div.id = commentsCnt + 'comment';
+  list.id = ++commentsCnt;
+  like.innerText = userLike;
+  like.id = commentsCnt + 'like';
+  like.onclick = () => {
+    console.log('now cnt: ', cnt);
+
+    const likeObj = userLikeSetter.likedUser;
+    console.log(likeObj);
+    // const isLikedUserId = likeObj.findIndex((user) => user.id);
+    // const isCnt = likeObj.findIndex((user) => (user.cnt === cnt ? -1 : cnt));
+    // const isSns = likeObj.findIndex((user) => user.sns);
+    // console.log('1st condition: ', isLikedUserId);
+    // console.log('2nd condition: ', isCnt);
+    // console.log('3rd condition: ', isSns);
+    // console.log('4th condition: ', likeObj.length - 2 === cnt);
+    // console.log('condition: ', likeObj.length);
+    // if(likeObj[cnt].cnt)
+    let isLikedUserId = null;
+    let isCnt = null;
+    let isSns = null;
+    // if(likeObj[cnt].isLikedUserId===loggedInUser) isLikedUserId=loggedInUser;
+    console.log(likeObj[cnt].id);
+    console.log(likeObj[cnt].cnt);
+    console.log(likeObj[cnt].sns);
+
+    if (
+      likeObj[cnt].id === loggedInUser &&
+      likeObj[cnt].cnt === cnt &&
+      likeObj[cnt].sns === dummyUserData.sns
+      //   likeObj.length - 2 === cnt
+    ) {
+      console.log('-----------------');
+
+      likeObj[cnt].like--;
+      like.innerText = likeObj[cnt].like;
+      //   likeObj.splice(isLikedUserId, 1);
+      delete likeObj[cnt].cnt;
+      delete likeObj[cnt].id;
+      delete likeObj[cnt].sns;
+      console.log('discarded: ', likeObj);
+    } else {
+      console.log('++++++++++++++++');
+      Object.assign(likeObj[cnt], {
+        cnt: cnt,
+        id: loggedInUser,
+        sns: dummyUserData.sns,
+      });
+      console.log('added: ', likeObj);
+
+      likeObj[cnt].like = likeObj[cnt].like + 1;
+
+      like.innerText = likeObj[cnt].like;
+    }
+    // if (!likeCnt.includes(loggedInUser)) {
+    //   //   likeCnt.push(loggedInUser);
+    //   console.log(userLikeSetter);
+
+    //   userLikeSetter.like++;
+    //   like.innerText = userLikeSetter.like;
+    // } else {
+    //   // likeCnt.splice(likeCnt.indexOf(loggedInUser), 1);
+    //   userLikeSetter.like--;
+    //   like.innerText = userLikeSetter.like;
+    // }
+  };
   document.querySelector('#showList').appendChild(list);
   document.getElementById(commentsCnt).appendChild(div);
+  document.getElementById(commentsCnt).insertAdjacentElement('afterend', like);
 };
 
 const makeDeleteBtn = (loggedInUser) => {
