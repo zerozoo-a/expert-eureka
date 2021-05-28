@@ -11,25 +11,31 @@ let dummyUserData = {
   sns: null,
   user1: [
     { sns: 'naver', loggedInUser: null },
-    { id: 'q', pwd: '1', comments: [], likedUser: [{ like: 0 }] },
-    { id: 'secondID', pwd: '1234', comments: [] },
+    {
+      id: 'q',
+      pwd: '1',
+      comments: [],
+      likedUser: [{ like: 0 }],
+      unLikedUser: [{ unLike: 0 }],
+    },
+    { id: 'secondID', pwd: '1234', comments: [], likedUser: [{ like: 0 }] },
   ],
   user2: [
     { sns: 'kakao', loggedInUser: null },
-    { id: 'kakaoID', pwd: '1111', comments: [] },
-    { id: 'kakaoId', pwd: '1111', comments: [] },
+    { id: 'kakaoID', pwd: '1111', comments: [], likedUser: [{ like: 0 }] },
+    { id: 'kakaoId', pwd: '1111', comments: [], likedUser: [{ like: 0 }] },
   ],
   user3: [
     { sns: 'faceBook', loggedInUser: null },
-    { id: 'facebookID', pwd: '1232', comments: [] },
+    { id: 'facebookID', pwd: '1232', comments: [], likedUser: [{ like: 0 }] },
   ],
   user4: [
     { sns: 'google', loggedInUser: null },
-    { id: 'googleID', pwd: '1231', comments: [] },
+    { id: 'googleID', pwd: '1231', comments: [], likedUser: [{ like: 0 }] },
   ],
   user5: [
     { sns: 'twitter', loggedInUser: null },
-    { id: 'twitterID', pwd: '1230', comments: [] },
+    { id: 'twitterID', pwd: '1230', comments: [], likedUser: [{ like: 0 }] },
   ],
 };
 const navState = () => {
@@ -315,6 +321,8 @@ const getComment = (event) => {
     default:
       return;
   }
+  console.log('here!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  console.log(loggedInUser);
   restrictWord(document.querySelector('#comment').value);
   if (restrictWords.isRestricted) return;
   restrictWords.isRestricted = false;
@@ -332,14 +340,14 @@ const setComment = (comments, loggedInUser) => {
   const list = document.createElement('li');
   const div = document.createElement('div');
   const like = document.createElement('div');
-  let userLike = null;
+  let selectLike = null;
   let userLikeSetter = null;
   const findUserLike = (user) => {
     let likeIndex = user.findIndex((user) => user.id === loggedInUser);
     user[likeIndex].likedUser.push({ like: 0 });
     // console.log(cnt);
     // console.log('here!!!', user[likeIndex].likedUser);
-    userLike = user[likeIndex].likedUser[cnt].like;
+    selectLike = user[likeIndex].likedUser[cnt].like;
     userLikeSetter = user[likeIndex];
   };
   switch (dummyUserData.sns) {
@@ -365,47 +373,24 @@ const setComment = (comments, loggedInUser) => {
   div.innerText = comments[comments.length - 1];
   div.id = commentsCnt + 'comment';
   list.id = ++commentsCnt;
-  like.innerText = userLike;
+  like.innerText = selectLike;
   like.id = commentsCnt + 'like';
   like.onclick = () => {
-    console.log('now cnt: ', cnt);
-
+    console.log(loggedInUser);
     const likeObj = userLikeSetter.likedUser;
-    console.log(likeObj);
-    // const isLikedUserId = likeObj.findIndex((user) => user.id);
-    // const isCnt = likeObj.findIndex((user) => (user.cnt === cnt ? -1 : cnt));
-    // const isSns = likeObj.findIndex((user) => user.sns);
-    // console.log('1st condition: ', isLikedUserId);
-    // console.log('2nd condition: ', isCnt);
-    // console.log('3rd condition: ', isSns);
-    // console.log('4th condition: ', likeObj.length - 2 === cnt);
-    // console.log('condition: ', likeObj.length);
-    // if(likeObj[cnt].cnt)
-    let isLikedUserId = null;
-    let isCnt = null;
-    let isSns = null;
-    // if(likeObj[cnt].isLikedUserId===loggedInUser) isLikedUserId=loggedInUser;
-    console.log(likeObj[cnt].id);
-    console.log(likeObj[cnt].cnt);
-    console.log(likeObj[cnt].sns);
 
     if (
       likeObj[cnt].id === loggedInUser &&
       likeObj[cnt].cnt === cnt &&
       likeObj[cnt].sns === dummyUserData.sns
-      //   likeObj.length - 2 === cnt
     ) {
-      console.log('-----------------');
-
       likeObj[cnt].like--;
       like.innerText = likeObj[cnt].like;
-      //   likeObj.splice(isLikedUserId, 1);
       delete likeObj[cnt].cnt;
       delete likeObj[cnt].id;
       delete likeObj[cnt].sns;
       console.log('discarded: ', likeObj);
     } else {
-      console.log('++++++++++++++++');
       Object.assign(likeObj[cnt], {
         cnt: cnt,
         id: loggedInUser,
@@ -417,19 +402,9 @@ const setComment = (comments, loggedInUser) => {
 
       like.innerText = likeObj[cnt].like;
     }
-    // if (!likeCnt.includes(loggedInUser)) {
-    //   //   likeCnt.push(loggedInUser);
-    //   console.log(userLikeSetter);
-
-    //   userLikeSetter.like++;
-    //   like.innerText = userLikeSetter.like;
-    // } else {
-    //   // likeCnt.splice(likeCnt.indexOf(loggedInUser), 1);
-    //   userLikeSetter.like--;
-    //   like.innerText = userLikeSetter.like;
-    // }
   };
   document.querySelector('#showList').appendChild(list);
+  //   document.getElementsById(commentsCnt).appendChild(like);
   document.getElementById(commentsCnt).appendChild(div);
   document.getElementById(commentsCnt).insertAdjacentElement('afterend', like);
 };
@@ -445,6 +420,7 @@ const makeDeleteBtn = (loggedInUser) => {
         document.getElementById(id + 'modifyForm').remove();
       }
       document.getElementById(id).remove();
+      document.getElementById(id + 'like').remove();
     }
   };
   document.getElementById(id).appendChild(deleteBtn);
@@ -494,7 +470,9 @@ const makeModifyBtn = (comments, loggedInUser) => {
         const modifiedValue = document.getElementById(id + 'modify').value;
         comments[id - 1] = modifiedValue;
 
-        document.getElementById(id + 'comment').innerText = modifiedValue;
+        document.getElementById(id - 1 + 'comment').innerHTML =
+          comments[id - 1];
+        // document.getElementById(id + 'comment').innerHTML = 1;
         document.getElementById(id + 'modifyForm').remove();
         document.getElementById('comment').focus();
       };
