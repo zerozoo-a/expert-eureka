@@ -10,69 +10,28 @@ const restrictWords = {
 let dummyUserData = {
   sns: null,
   loggedInUser: null,
+  index: null,
   user1: [
     { sns: 'naver', loggedInUser: null },
-    {
-      id: 'q',
-      pwd: '1',
-      comments: [],
-      likedUser: [{ like: 0, likedBy: [] }],
-      unLikedUser: [{ unLike: 0, unLikedBy: [] }],
-    },
-    {
-      id: 'secondID',
-      pwd: '1234',
-      comments: [],
-      likedUser: [{ like: 0, likedBy: [] }],
-      unLikedUser: [{ unLike: 0, unLikedBy: [] }],
-    },
+    { id: 'q', pwd: '1', comments: [], like: 0 },
+    { id: 'secondID', pwd: '1234', comments: [] },
   ],
   user2: [
     { sns: 'kakao', loggedInUser: null },
-    {
-      id: 'kakaoID',
-      pwd: '1111',
-      comments: [],
-      likedUser: [{ like: 0, likedBy: [] }],
-      unLikedUser: [{ unLike: 0, unLikedBy: [] }],
-    },
-    {
-      id: 'kakaoId',
-      pwd: '1111',
-      comments: [],
-      likedUser: [{ like: 0, likedBy: [] }],
-      unLikedUser: [{ unLike: 0, unLikedBy: [] }],
-    },
+    { id: 'kakaoID', pwd: '1111', comments: [] },
+    { id: 'kakaoId', pwd: '1111', comments: [] },
   ],
   user3: [
     { sns: 'faceBook', loggedInUser: null },
-    {
-      id: 'facebookID',
-      pwd: '1232',
-      comments: [],
-      likedUser: [{ like: 0, likedBy: [] }],
-      unLikedUser: [{ unLike: 0, unLikedBy: [] }],
-    },
+    { id: 'facebookID', pwd: '1232', comments: [] },
   ],
   user4: [
     { sns: 'google', loggedInUser: null },
-    {
-      id: 'googleID',
-      pwd: '1231',
-      comments: [],
-      likedUser: [{ like: 0, likedBy: [] }],
-      unLikedUser: [{ unLike: 0, unLikedBy: [] }],
-    },
+    { id: 'googleID', pwd: '1231', comments: [] },
   ],
   user5: [
     { sns: 'twitter', loggedInUser: null },
-    {
-      id: 'twitterID',
-      pwd: '1230',
-      comments: [],
-      likedUser: [{ like: 0, likedBy: [] }],
-      unLikedUser: [{ unLike: 0, unLikedBy: [] }],
-    },
+    { id: 'twitterID', pwd: '1230', comments: [] },
   ],
 };
 const navState = () => {
@@ -83,7 +42,6 @@ const navState = () => {
   };
   if (isLogIn) {
     logOutBtn.innerText = '로그아웃';
-
     commentState();
   } else {
     logOutBtn.innerText = '로그인';
@@ -208,6 +166,15 @@ const logIn = (event) => {
   };
   if (authenticate(sns, id, pwd)) {
     dummyUserData.loggedInUser = id;
+    console.log(id, sns);
+    let userN = null;
+    if (sns === 'naver') userN = dummyUserData.user1;
+    if (sns === 'kakaoTalk') userN = dummyUserData.user2;
+    if (sns === 'faceBook') userN = dummyUserData.user3;
+    if (sns === 'google') userN = dummyUserData.user4;
+    if (sns === 'twitter') userN = dummyUserData.user5;
+    dummyUserData.index = userN.findIndex((index) => index.id === id);
+
     navState();
     commentState();
     showDown(logInWindowForm);
@@ -366,156 +333,21 @@ const getComment = (event) => {
   restrictSpam();
   comments.push(document.querySelector('#comment').value);
   document.querySelector('#comment').value = '';
-  setComment(comments, loggedInUser);
+  setComment(comments);
   makeDeleteBtn(loggedInUser);
   makeModifyBtn(comments, loggedInUser);
   commentState();
 };
 
-const setComment = (comments, loggedInUser) => {
-  const cnt = commentsCnt;
-  let userCommentsCnt = comments.length;
-
+const setComment = (comments) => {
   const list = document.createElement('li');
   const div = document.createElement('div');
-  const like = document.createElement('div');
-  const unLike = document.createElement('div');
-  unLike.id = ++commentsCnt;
-
-  let userN = null;
-  const user = dummyUserData.loggedInUser;
-  const sns = dummyUserData.sns;
-  if (sns === 'naver') userN = dummyUserData.user1;
-  if (sns === 'kakaoTalk') userN = dummyUserData.user2;
-  if (sns === 'faceBook') userN = dummyUserData.user3;
-  if (sns === 'google') userN = dummyUserData.user4;
-  if (sns === 'twitter') userN = dummyUserData.user5;
-
-  const index = userN.findIndex((id) => id.id === user);
-  const condition = userN[index].unLikedUser[cnt].unLikedBy;
-  const unLikedUserAry = userN[index].unLikedUser;
-  unLike.innerText = unLikedUserAry[0].unLike;
-
-  unLike.onclick = () => {
-    const user = dummyUserData.loggedInUser;
-    const sns = dummyUserData.sns;
-    console.log(user);
-    console.log(sns);
-    console.log(
-      'condition',
-      condition.findIndex((id) => id.id === user)
-    );
-    console.log(
-      'condition',
-      condition.findIndex((social) => social.sns === sns)
-    );
-    if (
-      condition.findIndex((id) => id.id === user) !== -1 &&
-      condition.findIndex((social) => social.sns === sns) !== -1
-    ) {
-      let deleteIndex = condition.findIndex((id) => id.id === user);
-      unLikedUserAry[cnt].unLike--;
-      unLike.innerText = unLikedUserAry[cnt].unLike;
-      console.log(
-        'check cnt-',
-        (unLike.innerText = unLikedUserAry[cnt].unLike)
-      );
-
-      console.log(
-        'check delete',
-        unLikedUserAry[cnt].unLikedBy.splice(deleteIndex, 1)
-      );
-      unLikedUserAry[cnt].unLikedBy.splice(deleteIndex, 1);
-      //   console.log(deleteIndex);
-      //   console.log(unLikeCnt);
-      //   console.log(unLikedUserAry);
-      //   console.log('CNT', cnt);
-    } else {
-      let unLikedUserData = {
-        id: dummyUserData.loggedInUser,
-        sns: dummyUserData.sns,
-      };
-      unLikedUserAry[cnt].unLike++;
-      console.log('check cnt+', unLikedUserAry[cnt].unLike);
-      unLike.innerText = unLikedUserAry[cnt].unLike;
-
-      unLikedUserAry[cnt].unLikedBy.push(unLikedUserData);
-    }
-  };
-
-  let selectLike = null;
-  let userLikeSetter = null;
-  //   let userUnLikeSetter = null; -> likeSetter
-
-  const findUserLike = (user) => {
-    let likeIndex = user.findIndex((user) => user.id === loggedInUser);
-    user[likeIndex].likedUser.push({ like: 0 });
-    selectLike = user[likeIndex].likedUser[userCommentsCnt].like;
-    userLikeSetter = user[likeIndex];
-  };
-  switch (dummyUserData.sns) {
-    case 'naver':
-      findUserLike(dummyUserData.user1);
-      break;
-    case 'kakaoTalk':
-      findUserLike(dummyUserData.user2);
-      break;
-    case 'faceBook':
-      findUserLike(dummyUserData.user3);
-      break;
-    case 'google':
-      findUserLike(dummyUserData.user4);
-      break;
-    case 'twitter':
-      findUserLike(dummyUserData.user5);
-      break;
-    default:
-      break;
-  }
 
   div.innerText = comments[comments.length - 1];
-  div.id = commentsCnt + 'comment';
   list.id = ++commentsCnt;
-  like.innerText = selectLike;
-  like.id = commentsCnt + 'like';
-  like.onclick = () => {
-    const likeObj = userLikeSetter.likedUser;
-    if (
-      likeObj[cnt].likedBy.findIndex(
-        (id) => id.id === dummyUserData.loggedInUser
-      ) !== -1 &&
-      likeObj[cnt].likedBy.findIndex((sns) => sns.sns === dummyUserData.sns) !==
-        -1
-    ) {
-      let deleteIndex = likeObj[cnt].likedBy.findIndex(
-        (id) => id.id === dummyUserData.loggedInUser
-      );
-
-      likeObj[cnt].like--;
-      like.innerText = likeObj[cnt].like;
-      console.log(likeObj[cnt].likedBy);
-      likeObj[cnt].likedBy.splice(deleteIndex, 1);
-
-      console.log('likeObj: ', likeObj);
-    } else {
-      const likedUserData = {
-        id: dummyUserData.loggedInUser,
-        sns: dummyUserData.sns,
-      };
-      likeObj[cnt].likedBy.push(likedUserData);
-      likeObj[cnt].like++;
-      like.innerText = likeObj[cnt].like;
-
-      console.log('likeObj: ', likeObj);
-    }
-  };
-
+  div.id = commentsCnt + 'comment';
   document.querySelector('#showList').appendChild(list);
   document.getElementById(commentsCnt).appendChild(div);
-  document.getElementById(commentsCnt).insertAdjacentElement('afterend', like);
-  document
-    .getElementById(commentsCnt)
-    .insertAdjacentElement('afterend', unLike);
 };
 
 const makeDeleteBtn = (loggedInUser) => {
@@ -529,8 +361,6 @@ const makeDeleteBtn = (loggedInUser) => {
         document.getElementById(id + 'modifyForm').remove();
       }
       document.getElementById(id).remove();
-      document.getElementById(id + 'like').remove();
-      document.getElementById(id + 'unLike').remove();
     }
   };
   document.getElementById(id).appendChild(deleteBtn);
@@ -580,9 +410,7 @@ const makeModifyBtn = (comments, loggedInUser) => {
         const modifiedValue = document.getElementById(id + 'modify').value;
         comments[id - 1] = modifiedValue;
 
-        document.getElementById(id - 1 + 'comment').innerHTML =
-          comments[id - 1];
-        // document.getElementById(id + 'comment').innerHTML = 1;
+        document.getElementById(id + 'comment').innerText = modifiedValue;
         document.getElementById(id + 'modifyForm').remove();
         document.getElementById('comment').focus();
       };
