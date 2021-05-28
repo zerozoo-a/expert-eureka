@@ -9,13 +9,14 @@ const restrictWords = {
 };
 let dummyUserData = {
   sns: null,
+  loggedInUser: null,
   user1: [
     { sns: 'naver', loggedInUser: null },
     {
       id: 'q',
       pwd: '1',
       comments: [],
-      likedUser: [{ like: 0 }],
+      likedUser: [{ like: 0, likedBy: [] }],
       unLikedUser: [{ unLike: 0 }],
     },
     { id: 'secondID', pwd: '1234', comments: [], likedUser: [{ like: 0 }] },
@@ -46,6 +47,7 @@ const navState = () => {
   };
   if (isLogIn) {
     logOutBtn.innerText = '로그아웃';
+
     commentState();
   } else {
     logOutBtn.innerText = '로그인';
@@ -169,6 +171,7 @@ const logIn = (event) => {
     }
   };
   if (authenticate(sns, id, pwd)) {
+    dummyUserData.loggedInUser = id;
     navState();
     commentState();
     showDown(logInWindowForm);
@@ -321,8 +324,6 @@ const getComment = (event) => {
     default:
       return;
   }
-  console.log('here!!!!!!!!!!!!!!!!!!!!!!!!!!');
-  console.log(loggedInUser);
   restrictWord(document.querySelector('#comment').value);
   if (restrictWords.isRestricted) return;
   restrictWords.isRestricted = false;
@@ -337,18 +338,23 @@ const getComment = (event) => {
 
 const setComment = (comments, loggedInUser) => {
   const cnt = commentsCnt;
+  let userCommentsCnt = comments.length;
+
   const list = document.createElement('li');
   const div = document.createElement('div');
   const like = document.createElement('div');
+  const unLike = document.createElement('div');
+
   let selectLike = null;
   let userLikeSetter = null;
+  let selectUnLike = null;
+  //   let userUnLikeSetter = null; -> likeSetter
+
   const findUserLike = (user) => {
     let likeIndex = user.findIndex((user) => user.id === loggedInUser);
     user[likeIndex].likedUser.push({ like: 0 });
-    // console.log(cnt);
-    // console.log('here!!!', user[likeIndex].likedUser);
-    selectLike = user[likeIndex].likedUser[cnt].like;
-    userLikeSetter = user[likeIndex];
+    selectLike = user[likeIndex].likedUser[userCommentsCnt].like;
+    userLikeSetter = user[likeIndex]; // 글을 작성한 사람
   };
   switch (dummyUserData.sns) {
     case 'naver':
@@ -376,35 +382,69 @@ const setComment = (comments, loggedInUser) => {
   like.innerText = selectLike;
   like.id = commentsCnt + 'like';
   like.onclick = () => {
-    console.log(loggedInUser);
     const likeObj = userLikeSetter.likedUser;
 
+    console.log('CNT: ', cnt);
+    console.log('nowLogInUser: ', dummyUserData.loggedInUser);
+    console.log('owner: ', loggedInUser);
+
+    console.log('likeObj: ', likeObj);
+    console.log('dummyUserData: ', dummyUserData);
+
+    // console.log(
+    //   likeObj[cnt].likedBy.findIndex(
+    //     (id) => id.id === dummyUserData.loggedInUser
+    //   )
+    // ); //0
     if (
-      likeObj[cnt].id === loggedInUser &&
-      likeObj[cnt].cnt === cnt &&
-      likeObj[cnt].sns === dummyUserData.sns
+      //   likeObj[cnt].id === dummyUserData.loggedInUser &&
+      //   likeObj[cnt].cnt === cnt &&
+      //   likeObj[cnt].sns === dummyUserData.sns
+      likeObj[cnt].likedBy.findIndex(
+        (id) => id.id === dummyUserData.loggedInUser
+      ) !== -1 &&
+      likeObj[cnt].likedBy.findIndex((sns) => sns.sns === dummyUserData.sns) !==
+        -1
     ) {
+      let deleteIndex = likeObj[cnt].likedBy.findIndex(
+        (id) => id.id === dummyUserData.loggedInUser
+      );
+
       likeObj[cnt].like--;
       like.innerText = likeObj[cnt].like;
-      delete likeObj[cnt].cnt;
-      delete likeObj[cnt].id;
-      delete likeObj[cnt].sns;
-      console.log('discarded: ', likeObj);
+      console.log(likeObj[cnt].likedBy);
+      likeObj[cnt].likedBy.splice(deleteIndex, 1);
+
+      console.log('likeObj: ', likeObj);
+      //   delete likeObj[cnt].cnt;
+      //   delete likeObj[cnt].likedBy.id;
+      //   delete likeObj[cnt].sns;
     } else {
-      Object.assign(likeObj[cnt], {
-        cnt: cnt,
-        id: loggedInUser,
+      //   Object.assign(likeObj[cnt], {
+      //     cnt: cnt,
+      //     id: dummyUserData.loggedInUser,
+      //     sns: dummyUserData.sns,
+      //   });
+      //   likeObj[cnt].likedBy = [
+      //     { id: dummyUserData.loggedInUser, sns: dummyUserData.sns },
+      //     // ...likeObj[cnt].likedBy,
+      //   ];
+      //   likeObj[cnt].likedBy = {
+      //     id: dummyUserData.loggedInUser,
+      //     sns: dummyUserData.sns,
+      //   };
+      const likedUserData = {
+        id: dummyUserData.loggedInUser,
         sns: dummyUserData.sns,
-      });
-      console.log('added: ', likeObj);
-
-      likeObj[cnt].like = likeObj[cnt].like + 1;
-
+      };
+      likeObj[cnt].likedBy.push(likedUserData);
+      likeObj[cnt].like++;
       like.innerText = likeObj[cnt].like;
+
+      console.log('likeObj: ', likeObj);
     }
   };
   document.querySelector('#showList').appendChild(list);
-  //   document.getElementsById(commentsCnt).appendChild(like);
   document.getElementById(commentsCnt).appendChild(div);
   document.getElementById(commentsCnt).insertAdjacentElement('afterend', like);
 };
